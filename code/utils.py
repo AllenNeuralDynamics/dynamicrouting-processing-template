@@ -143,7 +143,12 @@ def get_session_table() -> pl.DataFrame:
     
 def get_df(component: str) -> pl.DataFrame:
     path = get_datacube_dir() / 'consolidated' / f'{component}.parquet'
-    return pl.read_parquet(path)
+    return (
+        pl.read_parquet(path)
+        .with_columns(
+            pl.col('session_id').str.split('_').list.slice(0, 2).list.join('_')
+        )
+    )
 
 @functools.cache
 def get_nwb_paths() -> tuple[pathlib.Path, ...]:
