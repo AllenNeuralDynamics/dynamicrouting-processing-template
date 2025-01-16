@@ -183,34 +183,35 @@ def main():
             
     # if session_id is passed as a command line argument, we will only process that session,
     # otherwise we process all session IDs that match filtering criteria:    
-    session_table = utils.get_session_table().to_pandas()
-    session_ids: list[str] = session_table.query(
-        " & ".join([
-            "is_ephys",
-            "project=='DynamicRouting'",
-            "is_task",
-            "is_annotated",
-            "~is_context_naive",
-        ])
-    )['session_id'].values.tolist()
+    session_table = pd.read_parquet(utils.get_datacube_dir() / 'session_table.parquet')
+    session_table['issues']=session_table['issues'].astype(str)
+    session_ids: list[str] = session_table.query(args.session_table_query)['session_id'].values.tolist()
+    logger.debug(f"Found {len(session_ids)} session_ids available for use after filtering")
     
     if args.session_id is not None:
         if args.session_id not in session_ids:
-            logger.info(f"{args.session_id!r} not in filtered sessions list")
-            session_ids = []
-        else:
-            logger.info(f"Using single session_id {args.session_id} provided via command line argument")
-            session_ids = [args.session_id]
+            logger.warning(f"{args.session_id!r} not in filtered session_ids: exiting")
+            exit()
+        logger.info(f"Using single session_id {args.session_id} provided via command line argument")
+        session_ids = [args.session_id]
+    elif utils.is_pipeline(): 
+        # only one nwb will be available 
+        session_ids = set(session_ids) & set(p.stem for p in utils.get_nwb_paths())
     else:
-        logger.info(f"Using list of {len(session_ids)} session_ids")
-
+        logger.info(f"Using list of {len(session_ids)} session_ids after filtering")
+    
     # run processing function for each session, with test mode implemented:
     for session_id in session_ids:
-        process_session(session_id, params=Params(**params), test=args.test)
+        try:
+            process_session(session_id, params=Params(**params | {'session_id': session_id}), test=args.test, skip_existing=args.skip_existing)
+        except Exception as e:
+            logger.exception(f'{session_id} | Failed:')
+        else:
+            logger.info(f'{session_id} | Completed')
+
         if args.test:
-            logger.info("TEST | Exiting after first session")
+            logger.info("Test mode: exiting after first session")
             break
-        
     utils.ensure_nonempty_results_dir()
     logger.info(f"Time elapsed: {time.time() - t0:.2f} s")
 
