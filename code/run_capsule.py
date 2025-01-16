@@ -183,7 +183,7 @@ def main():
             
     # if session_id is passed as a command line argument, we will only process that session,
     # otherwise we process all session IDs that match filtering criteria:    
-    session_table = utils.get_session_table()
+    session_table = utils.get_session_table().to_pandas()
     session_ids: list[str] = session_table.query(
         " & ".join([
             "is_ephys",
