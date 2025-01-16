@@ -124,6 +124,8 @@ def process_session(session_id: str, params: "Params", test: int = 0) -> None:
 # this is an example from Sam's processing code, replace with your own parameters as needed:
 @dataclasses.dataclass
 class Params:
+    session_id: str
+    
     nUnitSamples: int = 20
     unitSampleSize: int = 20
     windowDur: float = 1
@@ -204,7 +206,7 @@ def main():
     # run processing function for each session, with test mode implemented:
     for session_id in session_ids:
         try:
-            process_session(session_id, params=Params(**params | {'session_id': session_id}), test=args.test, skip_existing=args.skip_existing)
+            process_session(session_id, params=Params(session_id=session_id, **params), test=args.test, skip_existing=args.skip_existing)
         except Exception as e:
             logger.exception(f'{session_id} | Failed:')
         else:
