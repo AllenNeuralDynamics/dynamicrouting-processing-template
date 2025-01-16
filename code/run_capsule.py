@@ -43,6 +43,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--logging_level', type=str, default='INFO')
     parser.add_argument('--test', type=int, default=0)
     parser.add_argument('--update_packages_from_source', type=int, default=1)
+    parser.add_argument('--session_table_query', type=str, default="is_ephys & is_task & is_annotated & is_production & issues=='[]'")
     parser.add_argument('--override_params_json', type=str, default="{}")
     for field in dataclasses.fields(Params):
         if field.name in [getattr(action, 'dest') for action in parser._actions]:
