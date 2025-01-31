@@ -26,10 +26,6 @@
 					"version": "3.14.6"
 				},
 				{
-					"name": "matplotlib",
-					"version": "3.9.2"
-				},
-				{
 					"name": "numba",
 					"version": "0.60.0"
 				},
@@ -38,8 +34,8 @@
 					"version": "2.2.3"
 				},
 				{
-					"name": "polars",
-					"version": "1.17.1"
+					"name": "polars[plot]",
+					"version": "1.21.0"
 				},
 				{
 					"name": "pynwb",
@@ -59,7 +55,7 @@
 				},
 				{
 					"name": "zarr",
-					"version": "2.18.0"
+					"version": "2.17.2"
 				}
 			],
 			"options": {},
